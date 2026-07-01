@@ -1,0 +1,12 @@
+name: ai-toolkit
+version: 2026.06.30.1
+license: MIT
+description: 自分用のエージェント toolkit。skill / prompt / instruction / agent / hook をまとめたパッケージ。
+
+# このパッケージが依存として取り込むもの
+dependencies:
+  # 他リポジトリの APM パッケージや個別ファイル（virtual package）
+  apm:
+    - anthropics/skills/skills/frontend-design
+    - anthropics/skills/skills/skill-creator
+    - iKora128/stop-ai-slop-jp

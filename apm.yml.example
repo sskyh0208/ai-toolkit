@@ -1,0 +1,36 @@
+# ai-toolkit を取り込む側のプロジェクトに置く apm.yml の例。
+# このファイルを別プロジェクトの root に `apm.yml` としてコピーして使う。
+#
+# 前提（private リポジトリのため認証が必要）:
+#   gh auth login            # 推奨。gh にログイン済みなら追加設定は不要
+#   # もしくは fine-grained PAT（Contents: Read）を環境変数で渡す:
+#   export GITHUB_APM_PAT=ghp_xxxxxxxx
+
+name: my-project
+version: 0.1.0
+description: ai-toolkit の primitive を利用するプロジェクト
+
+# 配布先。省略すると .github/ や .claude/ などの存在から自動検出される。
+# 明示したい場合のみ記述する。
+targets:
+  - claude
+  - cursor
+
+dependencies:
+  apm:
+    # 1. パッケージ丸ごと取り込む（推奨）
+    #    skill / prompt / instruction / agent / hook と、
+    #    このパッケージが宣言する MCP 依存（github-mcp-server）も transitive に入る。
+    #    タグを切ったら #main ではなく #v0.1.0 のように固定するのが安全。
+    - sskyh0208/ai-toolkit#main
+
+    # 2. 個別ファイルだけ欲しい場合（virtual package / 上の行とは排他で選ぶ）
+    #    リポジトリ内のパスを指定して、特定の primitive だけ取り込む。
+    # - sskyh0208/ai-toolkit/.apm/skills/github#main
+    # - sskyh0208/ai-toolkit/.apm/prompts/changelog.prompt.md#main
+    # - sskyh0208/ai-toolkit/.apm/agents/release-manager.agent.md#main
+
+  # MCP サーバを自分でも直接足したい場合はここに書く。
+  # （上の「パッケージ丸ごと」を使う場合、toolkit 側の MCP 依存は自動で入るので不要）
+  # mcp:
+  #   - io.github.github/github-mcp-server

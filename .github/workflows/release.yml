@@ -1,0 +1,58 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Compute next CalVer tag
+        id: tag
+        run: |
+          set -euo pipefail
+          git fetch --tags --force
+          date="$(date -u +%Y.%m.%d)"
+          n=1
+          while git rev-parse -q --verify "refs/tags/v${date}.${n}" >/dev/null 2>&1; do
+            n=$((n + 1))
+          done
+          echo "tag=v${date}.${n}" >> "$GITHUB_OUTPUT"
+          echo "version=${date}.${n}" >> "$GITHUB_OUTPUT"
+          echo "next tag: v${date}.${n}"
+
+      - name: Sync apm.yml version, tag, and release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          tag="${{ steps.tag.outputs.tag }}"
+          version="${{ steps.tag.outputs.version }}"
+
+          sed -i -E "s/^version:.*/version: ${version}/" apm.yml
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          if ! git diff --quiet -- apm.yml; then
+            git add apm.yml
+            git commit -m "chore: バージョンを ${version} に更新"
+            git push origin HEAD:main
+          fi
+
+          git tag "${tag}"
+          git push origin "${tag}"
+
+          gh release create "${tag}" --title "${tag}" --generate-notes
