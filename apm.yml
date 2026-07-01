@@ -1,5 +1,5 @@
 name: ai-toolkit
-version: 2026.06.30.1
+version: 2026.07.01.1
 license: MIT
 description: 自分用のエージェント toolkit。skill / prompt / instruction / agent / hook をまとめたパッケージ。
 
